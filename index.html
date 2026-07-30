@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#141C4C">
+<title>봉명철봉킹</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gothic+A1:wght@400;500;700;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   봉명철봉킹 — 상지 근력 단원 학생용 앱
+   디자인 토큰
+   ============================================================ */
+:root{
+  --navy:#141C4C;
+  --navy-2:#1E2A6E;
+  --volt:#C6FF3D;      /* 완료·성공 */
+  --flame:#FF5A1F;     /* 실행 버튼 */
+  --sky:#3FD0FF;       /* 정보·수치 */
+  --paper:#F7F8FC;
+  --line:rgba(255,255,255,.14);
+  --ink:#111634;
+  --muted:#7A82A8;
+  --r:16px;
+  --disp:'Black Han Sans','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  --body:'Gothic A1','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  --num:'Bebas Neue','Gothic A1',sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:var(--body);
+  background:var(--navy);
+  color:#fff;
+  min-height:100dvh;
+  overflow-x:hidden;
+}
+/* 체육관 코트 라인을 배경으로 */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(120% 80% at 85% -10%, rgba(63,208,255,.20), transparent 60%),
+    radial-gradient(90% 60% at 0% 110%, rgba(255,90,31,.18), transparent 60%),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.035) 0 1px, transparent 1px 46px),
+    repeating-linear-gradient(0deg, rgba(255,255,255,.035) 0 1px, transparent 1px 46px),
+    linear-gradient(165deg,#141C4C 0%,#1E2A6E 60%,#2B1C5E 100%);
+}
+.wrap{position:relative;z-index:1;max-width:440px;margin:0 auto;padding:14px 16px 28px;min-height:100dvh;display:flex;flex-direction:column;}
+
+/* ---------- 헤더 ---------- */
+.hd{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.logo{font-family:var(--disp);font-size:23px;letter-spacing:-.5px;line-height:1;}
+.logo em{font-style:normal;color:var(--volt);}
+.whoami{font-size:11px;color:#B9C0E4;text-align:right;line-height:1.35;}
+.whoami b{color:#fff;font-weight:700;}
+
+/* ---------- 진행 레일 (철봉) ---------- */
+.rail{margin:12px 0 14px;}
+.rail-bar{height:7px;border-radius:99px;background:rgba(255,255,255,.13);position:relative;overflow:hidden;}
+.rail-fill{position:absolute;inset:0 auto 0 0;width:20%;border-radius:99px;
+  background:linear-gradient(90deg,var(--sky),var(--volt));transition:width .45s cubic-bezier(.2,.8,.2,1);}
+.rail-tags{display:flex;justify-content:space-between;margin-top:7px;font-size:10px;color:#8F98C6;letter-spacing:-.2px;}
+.rail-tags span.now{color:var(--volt);font-weight:700;}
+
+/* ---------- 화면 ---------- */
+.screen{display:none;flex:1;flex-direction:column;}
+.screen.on{display:flex;animation:in .3s ease both;}
+@keyframes in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--sky);margin:0 0 4px;}
+h1{font-family:var(--disp);font-size:27px;line-height:1.2;margin:0 0 3px;letter-spacing:-.6px;}
+.sub{font-size:12.5px;color:#B9C0E4;margin:0 0 16px;line-height:1.5;}
+
+/* ---------- 카드 / 폼 ---------- */
+.card{background:rgba(255,255,255,.07);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:11px;}
+.lab{font-size:11.5px;font-weight:700;color:#A6AEDB;margin-bottom:7px;letter-spacing:.3px;}
+.chips{display:flex;flex-wrap:wrap;gap:7px;}
+.chip{border:1.5px solid rgba(255,255,255,.22);background:rgba(255,255,255,.05);color:#E7EAFB;
+  border-radius:11px;padding:10px 0;font-family:var(--body);font-size:14px;font-weight:700;
+  flex:1 1 0;min-width:46px;cursor:pointer;transition:.15s;}
+.chip.wide{flex:1 1 30%;}
+.chip:active{transform:scale(.96);}
+.chip.sel{background:var(--volt);border-color:var(--volt);color:var(--ink);}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+input.num,input.txt{width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.2);
+  border-radius:11px;color:#fff;font-family:var(--body);font-size:17px;font-weight:700;padding:11px 12px;text-align:center;}
+input.txt{text-align:left;font-size:14px;font-weight:400;}
+input.num:focus,input.txt:focus{outline:none;border-color:var(--sky);}
+input::placeholder{color:#7A82A8;font-weight:400;}
+
+/* ---------- 스테퍼 ---------- */
+.stepper{display:flex;align-items:center;gap:10px;}
+.sbtn{width:58px;height:58px;flex:0 0 58px;border-radius:50%;border:none;background:rgba(255,255,255,.12);
+  color:#fff;font-size:28px;font-family:var(--body);font-weight:700;line-height:1;cursor:pointer;transition:.12s;}
+.sbtn:active{transform:scale(.9);background:var(--sky);color:var(--ink);}
+.sval{flex:1;text-align:center;}
+.sval b{font-family:var(--num);font-size:56px;line-height:.9;display:block;color:var(--volt);}
+.sval i{font-style:normal;font-size:12px;color:#A6AEDB;}
+.lv{display:flex;align-items:center;gap:9px;margin-top:12px;padding:10px 12px;border-radius:12px;
+  background:rgba(63,208,255,.12);border:1px solid rgba(63,208,255,.3);}
+.lv-tag{font-family:var(--num);font-size:22px;color:var(--sky);line-height:1;}
+.lv-tx{font-size:11.5px;color:#D3D9F5;line-height:1.45;}
+.tmr{margin-top:10px;display:flex;gap:8px;align-items:center;}
+.tmr-btn{flex:1;padding:11px;border-radius:11px;border:1.5px solid var(--sky);background:transparent;
+  color:var(--sky);font-family:var(--body);font-weight:700;font-size:13.5px;cursor:pointer;}
+.tmr-btn.rec{background:var(--flame);border-color:var(--flame);color:#fff;}
+.tmr-out{font-family:var(--num);font-size:30px;color:#fff;min-width:74px;text-align:center;}
+
+/* ---------- 프로그램 선택 ---------- */
+.plist{display:flex;flex-direction:column;gap:10px;overflow-y:auto;}
+.prog{text-align:left;width:100%;background:rgba(255,255,255,.07);border:1.5px solid var(--line);
+  border-radius:14px;padding:13px 14px;cursor:pointer;color:#fff;font-family:var(--body);transition:.15s;}
+.prog:active{transform:scale(.985);}
+.prog.sel{border-color:var(--volt);background:rgba(198,255,61,.13);}
+.prog-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;}
+.prog-n{font-family:var(--disp);font-size:17px;letter-spacing:-.3px;}
+.prog-t{font-size:10px;font-weight:700;color:var(--sky);border:1px solid rgba(63,208,255,.4);
+  border-radius:99px;padding:3px 8px;white-space:nowrap;}
+.prog-g{font-size:11.5px;color:#B9C0E4;margin:5px 0 8px;line-height:1.45;}
+.prog-s{font-size:12px;color:#E7EAFB;line-height:1.6;}
+.prog-s span{color:var(--volt);font-weight:700;font-family:var(--num);font-size:14px;margin-right:5px;}
+.custom-set{display:grid;grid-template-columns:1fr 82px;gap:7px;margin-bottom:7px;}
+.notice{font-size:11px;color:#9AA3CE;line-height:1.5;margin-top:4px;}
+
+/* ---------- 세트 카드 (시그니처) ---------- */
+.sets{display:flex;flex-direction:column;gap:12px;}
+.set{position:relative;width:100%;text-align:left;border:none;border-radius:16px;padding:18px 16px 16px;
+  background:var(--paper);color:var(--ink);font-family:var(--body);cursor:pointer;
+  transition:transform .18s cubic-bezier(.2,.8,.2,1),background .3s,filter .35s,opacity .35s;overflow:hidden;}
+.set::before{ /* 철봉 */
+  content:'';position:absolute;left:16px;right:16px;top:9px;height:4px;border-radius:99px;
+  background:linear-gradient(90deg,#C3C9E0,#8C95BC,#C3C9E0);}
+.set-no{font-family:var(--num);font-size:13px;letter-spacing:2px;color:var(--muted);}
+.set-body{margin-top:2px;}
+.set-item{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:3px 0;}
+.set-item b{font-family:var(--disp);font-size:18px;letter-spacing:-.4px;}
+.set-item i{font-style:normal;font-family:var(--num);font-size:26px;color:var(--flame);line-height:1;}
+.set-hint{margin-top:9px;font-size:11px;font-weight:700;color:var(--flame);letter-spacing:.2px;}
+.set.done{background:var(--volt);filter:blur(1.6px) saturate(.85);opacity:.62;transform:scale(.975) rotate(-.6deg);}
+.set.done .set-hint{color:#3D5A00;}
+.set.done .set-item i{color:#3D5A00;}
+.set.done .set-body{position:relative;}
+.set.done .set-body::after{ /* 분필 자국 */
+  content:'';position:absolute;left:-4px;right:-4px;top:52%;height:4px;border-radius:2px;
+  background:#3D5A00;opacity:.75;animation:strike .28s ease both;}
+@keyframes strike{from{transform:scaleX(0);transform-origin:left}to{transform:scaleX(1)}}
+.set.pop{animation:pop .34s ease;}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.03)}100%{transform:scale(.975) rotate(-.6deg)}}
+.rest{margin-top:12px;border-radius:14px;padding:13px;text-align:center;
+  background:rgba(63,208,255,.12);border:1px solid rgba(63,208,255,.35);}
+.rest .t{font-family:var(--num);font-size:44px;line-height:1;color:var(--sky);}
+.rest .l{font-size:11px;color:#B9C0E4;margin-bottom:3px;}
+.rest button{margin-top:8px;background:none;border:1px solid rgba(255,255,255,.3);border-radius:99px;
+  color:#E7EAFB;font-family:var(--body);font-size:12px;font-weight:700;padding:7px 16px;cursor:pointer;}
+
+/* ---------- 기록 ---------- */
+.stat{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:11px;}
+.stat div{background:rgba(255,255,255,.07);border:1px solid var(--line);border-radius:13px;padding:11px 6px;text-align:center;}
+.stat b{display:block;font-family:var(--num);font-size:30px;line-height:1;color:var(--volt);}
+.stat i{font-style:normal;font-size:10.5px;color:#A6AEDB;}
+.chart{width:100%;height:112px;display:block;}
+.chart-empty{font-size:12px;color:#9AA3CE;text-align:center;padding:26px 0;line-height:1.6;}
+.next{background:linear-gradient(100deg,rgba(255,90,31,.22),rgba(255,90,31,.07));
+  border:1px solid rgba(255,90,31,.4);border-radius:14px;padding:12px 14px;margin-bottom:11px;}
+.next .l{font-size:10.5px;font-weight:700;letter-spacing:1px;color:var(--flame);margin-bottom:4px;}
+.next .v{font-size:13.5px;font-weight:700;line-height:1.5;}
+textarea{width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.2);
+  border-radius:11px;color:#fff;font-family:var(--body);font-size:13.5px;padding:11px;resize:none;line-height:1.5;}
+textarea:focus{outline:none;border-color:var(--sky);}
+
+/* ---------- 하단 버튼 ---------- */
+.foot{margin-top:auto;padding-top:14px;display:flex;gap:9px;align-items:stretch;}
+.btn{flex:1;border:none;border-radius:14px;padding:16px;font-family:var(--disp);font-size:17px;
+  letter-spacing:-.3px;cursor:pointer;transition:.15s;}
+.btn:active{transform:scale(.98);}
+.btn-go{background:var(--flame);color:#fff;box-shadow:0 8px 22px -8px rgba(255,90,31,.8);}
+.btn-go[disabled]{background:rgba(255,255,255,.12);color:#6E76A0;box-shadow:none;}
+.btn-back{flex:0 0 62px;background:rgba(255,255,255,.1);color:#C6CCEB;font-size:14px;}
+.msg{font-size:11.5px;text-align:center;margin-top:9px;min-height:16px;color:var(--sky);}
+.msg.warn{color:#FFB37A;}
+
+/* ---------- 완료 ---------- */
+.done-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px;}
+.done-badge{font-family:var(--num);font-size:76px;line-height:.85;color:var(--volt);}
+.pill{display:inline-block;font-size:11px;background:rgba(255,255,255,.1);border:1px solid var(--line);
+  border-radius:99px;padding:6px 13px;color:#C6CCEB;}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hd">
+    <div class="logo">봉명<em>철봉</em>킹</div>
+    <div class="whoami" id="whoami"></div>
+  </div>
+
+  <div class="rail">
+    <div class="rail-bar"><div class="rail-fill" id="railFill"></div></div>
+    <div class="rail-tags" id="railTags">
+      <span>출석</span><span>수준</span><span>프로그램</span><span>운동</span><span>기록</span>
+    </div>
+  </div>
+
+  <!-- ================= 1. 출석 ================= -->
+  <section class="screen on" id="s0">
+    <p class="eyebrow">STEP 1</p>
+    <h1>오늘 누가 매달리나</h1>
+    <p class="sub">이름은 적지 않습니다. 학년·반·번호로 만든 코드로만 기록됩니다.</p>
+
+    <div class="card">
+      <div class="lab">학년</div>
+      <div class="chips" id="cGrade"></div>
+    </div>
+    <div class="grid2">
+      <div class="card"><div class="lab">반</div><input class="num" id="iCls" inputmode="numeric" placeholder="0"></div>
+      <div class="card"><div class="lab">번호</div><input class="num" id="iNum" inputmode="numeric" placeholder="0"></div>
+    </div>
+    <div class="card">
+      <div class="lab">모둠</div>
+      <div class="chips" id="cTeam"></div>
+    </div>
+    <div class="card">
+      <div class="lab">측정 종목</div>
+      <div class="chips" id="cSex"></div>
+    </div>
+    <div class="card">
+      <div class="lab">오늘 차시</div>
+      <div class="stepper">
+        <button class="sbtn" data-les="-1">−</button>
+        <div class="sval"><b id="lesVal">5</b><i>차시 / 12</i></div>
+        <button class="sbtn" data-les="1">+</button>
+      </div>
+    </div>
+
+    <div class="foot"><button class="btn btn-go" id="go0">다음</button></div>
+    <div class="msg" id="m0"></div>
+  </section>
+
+  <!-- ================= 2. 수준 ================= -->
+  <section class="screen" id="s1">
+    <p class="eyebrow">STEP 2</p>
+    <h1 id="s1t">지금 내 기록</h1>
+    <p class="sub" id="s1s"></p>
+
+    <div class="card">
+      <div class="lab" id="s1lab"></div>
+      <div class="stepper">
+        <button class="sbtn" data-val="-1">−</button>
+        <div class="sval"><b id="valVal">0</b><i id="valUnit">회</i></div>
+        <button class="sbtn" data-val="1">+</button>
+      </div>
+      <div class="tmr" id="tmrBox" style="display:none">
+        <button class="tmr-btn" id="tmrBtn">타이머로 재기</button>
+        <div class="tmr-out" id="tmrOut">0"</div>
+      </div>
+      <div class="lv"><div class="lv-tag" id="lvTag">LV1</div><div class="lv-tx" id="lvTx"></div></div>
+    </div>
+
+    <div class="card">
+      <div class="lab">보조 밴드</div>
+      <div class="chips" id="cBand"></div>
+      <p class="notice">밴드를 쓰면 실제 근력보다 기록이 높게 나오므로 레벨을 낮춰 계산합니다.</p>
+    </div>
+
+    <div class="foot">
+      <button class="btn btn-back" data-go="0">이전</button>
+      <button class="btn btn-go" id="go1">프로그램 보기</button>
+    </div>
+    <div class="msg" id="m1"></div>
+  </section>
+
+  <!-- ================= 3. 프로그램 ================= -->
+  <section class="screen" id="s2">
+    <p class="eyebrow">STEP 3</p>
+    <h1>오늘 할 프로그램</h1>
+    <p class="sub" id="s2s"></p>
+
+    <div class="plist" id="plist"></div>
+
+    <div class="card" id="customBox" style="display:none">
+      <div class="lab">직접 만들기 · 세트당 내용</div>
+      <div class="custom-set"><input class="txt" id="cn1" placeholder="종목 (예: 데드행)"><input class="txt" id="cd1" placeholder="20초"></div>
+      <div class="custom-set"><input class="txt" id="cn2" placeholder="종목"><input class="txt" id="cd2" placeholder="분량"></div>
+      <div class="custom-set"><input class="txt" id="cd3" placeholder="휴식 초" style="grid-column:1/3"></div>
+      <p class="notice">2번째 줄은 비워도 됩니다. 직접 만든 프로그램은 선생님 확인 후 실시하세요.</p>
+    </div>
+
+    <div class="foot">
+      <button class="btn btn-back" data-go="1">이전</button>
+      <button class="btn btn-go" id="go2" disabled>운동 시작</button>
+    </div>
+    <div class="msg" id="m2"></div>
+  </section>
+
+  <!-- ================= 4. 운동 ================= -->
+  <section class="screen" id="s3">
+    <p class="eyebrow" id="s3e">STEP 4</p>
+    <h1 id="s3t">세트를 눌러 지우기</h1>
+    <p class="sub">한 세트를 끝내면 카드를 누르세요. 3개를 다 지우면 기록으로 넘어갑니다.</p>
+
+    <div class="sets" id="sets"></div>
+    <div class="rest" id="restBox" style="display:none">
+      <div class="l">휴식</div><div class="t" id="restT">90</div>
+      <button id="restSkip">바로 다음 세트</button>
+    </div>
+
+    <div class="foot">
+      <button class="btn btn-back" data-go="2">이전</button>
+      <button class="btn btn-go" id="go3" disabled>기록하기</button>
+    </div>
+    <div class="msg" id="m3"></div>
+  </section>
+
+  <!-- ================= 5. 기록 ================= -->
+  <section class="screen" id="s4">
+    <p class="eyebrow">STEP 5</p>
+    <h1>내 기록과 다음 목표</h1>
+    <p class="sub" id="s4s">지금까지의 변화입니다.</p>
+
+    <div class="stat">
+      <div><b id="stA">0</b><i id="stAl">최고 기록</i></div>
+      <div><b id="stB">0</b><i>누적 세트</i></div>
+      <div><b id="stC">0</b><i>참여 차시</i></div>
+    </div>
+    <div class="card" style="padding:12px 10px 6px">
+      <div class="lab" style="padding-left:4px" id="chartLab">기록 변화</div>
+      <svg class="chart" id="chart" viewBox="0 0 320 112" preserveAspectRatio="none"></svg>
+      <div class="chart-empty" id="chartEmpty" style="display:none">오늘이 첫 기록입니다.<br>다음 차시부터 변화가 그려집니다.</div>
+    </div>
+
+    <div class="next"><div class="l">다음 운동 예고</div><div class="v" id="nextV"></div></div>
+
+    <div class="card">
+      <div class="lab">체감 난이도</div>
+      <div class="chips" id="cRpe"></div>
+    </div>
+    <div class="card">
+      <div class="lab">실패 지점 (여러 개 선택 가능)</div>
+      <div class="chips" id="cFail"></div>
+    </div>
+    <div class="card">
+      <div class="lab">한 줄 성찰</div>
+      <textarea id="iNote" rows="2" placeholder="오늘 무엇이 달랐고, 왜 그랬는지 적어보세요."></textarea>
+    </div>
+
+    <div class="foot">
+      <button class="btn btn-back" data-go="3">이전</button>
+      <button class="btn btn-go" id="go4">기록 저장</button>
+    </div>
+    <div class="msg" id="m4"></div>
+  </section>
+
+  <!-- ================= 완료 ================= -->
+  <section class="screen" id="s5">
+    <div class="done-wrap">
+      <div class="done-badge" id="doneBadge">3/3</div>
+      <h1 style="margin:6px 0 2px">기록 저장 완료</h1>
+      <p class="sub" id="doneSub" style="margin-bottom:12px"></p>
+      <div class="pill" id="donePill"></div>
+    </div>
+    <div class="foot"><button class="btn btn-go" id="go5">처음으로</button></div>
+    <div class="msg" id="m5"></div>
+  </section>
+
+</div>
+
+<script>
+/* ============================================================
+   선생님 설정 구역 — 여기만 고치면 됩니다
+   ============================================================ */
+const CONFIG = {
+  // Apps Script 웹앱 URL. 비워두면 '연습 모드'로 폰에만 저장됩니다.
+  SHEET_API: "https://script.google.com/macros/s/AKfycbyy7eJSJdDr9DTZuF4Kr7o_emqLenuQWKYwPCx62GXExf90jVLnZ_44Fl60vGHBs9s1/exec",
+
+  UNIT_TOTAL: 12,        // 단원 총 차시
+  DEFAULT_LESSON: 5,     // 앱을 처음 열 때 보이는 차시
+  CLASS_MAX: 12,         // 반 최대
+  TEAM_MAX: 6,           // 모둠 개수
+
+  // 레벨 기준 — 학교 실측 분포에 맞게 조정하세요 (국가 기준이 아니라 학급 운영용 임의 구간입니다)
+  LEVEL_M: [             // 남 · 턱걸이(회)
+    {max:0,  lv:1, name:"기초", tx:"밴드 보조와 데드행으로 매달리는 힘부터 만듭니다."},
+    {max:3,  lv:2, name:"기본", tx:"첫 개수를 늘리는 단계. 네거티브가 가장 잘 듣습니다."},
+    {max:7,  lv:3, name:"향상", tx:"볼륨과 템포로 근력을 쌓는 단계입니다."},
+    {max:999,lv:4, name:"심화", tx:"천장에 가깝습니다. 템포·자세와 동료 지도로 도전하세요."}
+  ],
+  LEVEL_F: [             // 여 · 오래매달리기(초)
+    {max:10, lv:1, name:"기초", tx:"발 지지와 밴드로 매달리는 시간을 확보합니다."},
+    {max:25, lv:2, name:"기본", tx:"그립을 강화해 시간을 늘리는 단계입니다."},
+    {max:45, lv:3, name:"향상", tx:"능동 매달리기로 어깨를 쓰는 단계입니다."},
+    {max:999,lv:4, name:"심화", tx:"천장에 가깝습니다. 네거티브와 동료 지도로 도전하세요."}
+  ],
+
+  BANDS: [
+    {k:"none", n:"없음",  adj:0},
+    {k:"y",    n:"약",    adj:0},
+    {k:"r",    n:"중",    adj:-1},
+    {k:"g",    n:"강",    adj:-1},
+    {k:"b",    n:"최강",  adj:-2}
+  ],
+
+  // 프로그램: 각 3세트 구조. items = [종목, 분량]
+  PROGRAMS: {
+    M1:[
+      {n:"매달리기 기초", g:"매달리는 시간과 어깨 고정부터 만듭니다.", rest:60,
+       items:[["데드행","15초"],["스캐퓰러 풀","5회"]]},
+      {n:"밴드 보조 턱걸이", g:"완전한 동작을 성공 경험으로 먼저 익힙니다.", rest:75,
+       items:[["밴드 보조 턱걸이","5회"]]},
+      {n:"네거티브 중심", g:"내려오는 힘으로 첫 1회를 준비합니다.", rest:75,
+       items:[["네거티브 턱걸이","3회 (3초 내리기)"]]}
+    ],
+    M2:[
+      {n:"첫 개수 늘리기", g:"최대 반복 뒤 밴드로 볼륨을 채웁니다.", rest:90,
+       items:[["턱걸이","최대 반복"],["밴드 보조 턱걸이","3회"]]},
+      {n:"네거티브 강화", g:"천천히 내리는 시간을 늘려 근력을 키웁니다.", rest:90,
+       items:[["네거티브 턱걸이","4회 (5초 내리기)"]]},
+      {n:"데드행 확장", g:"버티는 힘과 당기는 힘을 함께 씁니다.", rest:75,
+       items:[["데드행","25초"],["턱걸이","2회"]]}
+    ],
+    M3:[
+      {n:"볼륨 쌓기", g:"같은 개수를 세 번 반복해 총량을 늘립니다.", rest:90,
+       items:[["턱걸이","5회"]]},
+      {n:"템포 턱걸이", g:"속도를 죽여 자세의 질을 끌어올립니다.", rest:90,
+       items:[["템포 턱걸이","4회 (1-2-3초)"]]},
+      {n:"혼합", g:"당기기와 버티기를 한 세트에 넣습니다.", rest:90,
+       items:[["턱걸이","4회"],["데드행","20초"]]}
+    ],
+    M4:[
+      {n:"고반복", g:"세트당 개수를 밀어 올립니다.", rest:120,
+       items:[["턱걸이","8회"]]},
+      {n:"느린 템포", g:"개수를 줄이고 난도를 올립니다.", rest:120,
+       items:[["느린 템포 턱걸이","6회 (2-2-4초)"]]},
+      {n:"동료 지도 + 내 운동", g:"기초 조원의 자세를 봐주며 내 볼륨도 채웁니다.", rest:120,
+       items:[["턱걸이","6회"],["조원 자세 코칭","1명"]]}
+    ],
+    F1:[
+      {n:"밴드 보조 매달리기", g:"밴드로 체중을 덜고 시간을 확보합니다.", rest:60,
+       items:[["밴드 보조 데드행","15초"]]},
+      {n:"발 지지 매달리기", g:"발을 대고 부담을 낮춰 자세를 익힙니다.", rest:60,
+       items:[["박스 발 지지 매달리기","20초"]]},
+      {n:"그립 만들기", g:"손이 먼저 풀리는 문제를 해결합니다.", rest:60,
+       items:[["매달리기","8초"],["악력 유지","15초"]]}
+    ],
+    F2:[
+      {n:"시간 늘리기", g:"같은 자세로 버티는 시간을 늘립니다.", rest:75,
+       items:[["매달리기","20초"]]},
+      {n:"그립 강화", g:"손이 미끄러지는 지점을 밀어냅니다.", rest:75,
+       items:[["매달리기","15초"],["타월 그립 매달리기","10초"]]},
+      {n:"스캐퓰러", g:"어깨를 능동적으로 써서 버팁니다.", rest:75,
+       items:[["스캐퓰러 풀","6회"],["매달리기","15초"]]}
+    ],
+    F3:[
+      {n:"지속 시간", g:"30초 벽을 넘는 데 집중합니다.", rest:90,
+       items:[["매달리기","30초"]]},
+      {n:"능동 매달리기", g:"어깨를 내린 상태로 버티는 난도 높은 방식입니다.", rest:90,
+       items:[["스캐퓰러 유지 매달리기","20초"]]},
+      {n:"혼합", g:"버티기에 당기기를 더합니다.", rest:90,
+       items:[["매달리기","25초"],["네거티브 턱걸이","2회"]]}
+    ],
+    F4:[
+      {n:"장시간", g:"45초 이상을 목표로 밀어 올립니다.", rest:120,
+       items:[["매달리기","45초"]]},
+      {n:"네거티브 도전", g:"턱걸이 동작으로 넘어가는 단계입니다.", rest:120,
+       items:[["네거티브 턱걸이","3회"],["매달리기","30초"]]},
+      {n:"동료 지도 + 내 운동", g:"조원 그립을 봐주며 내 시간도 채웁니다.", rest:120,
+       items:[["매달리기","40초"],["조원 그립 코칭","1명"]]}
+    ]
+  },
+
+  FAILS:["그립(손)","어깨","팔꿈치","마지막 세트","호흡","없음"]
+};
+
+/* ============================================================
+   저장소 (localStorage 불가 환경에서는 메모리로 대체)
+   ============================================================ */
+const store=(()=>{let mem={},ok=false;
+  try{localStorage.setItem("__t","1");localStorage.removeItem("__t");ok=true;}catch(e){ok=false;}
+  return{
+    get(k){try{return ok?localStorage.getItem(k):(k in mem?mem[k]:null);}catch(e){return k in mem?mem[k]:null;}},
+    set(k,v){try{ok?localStorage.setItem(k,v):mem[k]=v;}catch(e){mem[k]=v;}}
+  };})();
+const jget=(k,d)=>{try{return JSON.parse(store.get(k))??d;}catch(e){return d;}};
+const jset=(k,v)=>store.set(k,JSON.stringify(v));
+
+/* ============================================================
+   상태
+   ============================================================ */
+const S={step:0,grade:1,cls:"",num:"",team:"",sex:"",lesson:CONFIG.DEFAULT_LESSON,
+  value:0,band:"none",lv:1,lvName:"",prog:null,done:[false,false,false],
+  rpe:0,fails:[],note:"",next:""};
+let history=jget("bck_hist",[]);
+let queue=jget("bck_queue",[]);
+const $=id=>document.getElementById(id);
+const unit=()=>S.sex==="F"?"초":"회";
+
+/* 이전 입력 복원 */
+(function restore(){
+  const p=jget("bck_me",null); if(!p)return;
+  S.grade=p.grade||1;S.cls=p.cls||"";S.num=p.num||"";S.team=p.team||"";S.sex=p.sex||"";
+  S.band=p.band||"none";S.lesson=Math.min(CONFIG.UNIT_TOTAL,(p.lesson||CONFIG.DEFAULT_LESSON-1)+1);
+})();
+
+/* ============================================================
+   화면 이동
+   ============================================================ */
+function go(n){
+  S.step=n;
+  document.querySelectorAll(".screen").forEach((el,i)=>el.classList.toggle("on",i===n));
+  $("railFill").style.width=Math.min(100,(n+1)/5*100)+"%";
+  [...$("railTags").children].forEach((el,i)=>el.classList.toggle("now",i===Math.min(n,4)));
+  if(n===1)renderLevel();
+  if(n===2)renderPrograms();
+  if(n===3)renderSets();
+  if(n===4)renderRecord();
+  window.scrollTo(0,0);
+  stopRest();
+}
+document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(+b.dataset.go));
+
+/* ============================================================
+   STEP 1
+   ============================================================ */
+function chipset(box,arr,get,set,cls){
+  box.innerHTML="";
+  arr.forEach(o=>{
+    const b=document.createElement("button");
+    b.className="chip"+(cls?" "+cls:"");b.textContent=o.n;
+    b.onclick=()=>{set(o.v);[...box.children].forEach(c=>c.classList.remove("sel"));b.classList.add("sel");after();};
+    if(get()===o.v)b.classList.add("sel");
+    box.appendChild(b);
+  });
+}
+function after(){ valid0(); who(); }
+chipset($("cGrade"),[1,2,3].map(v=>({v,n:v+"학년"})),()=>S.grade,v=>S.grade=v);
+chipset($("cTeam"),Array.from({length:CONFIG.TEAM_MAX},(_,i)=>({v:String(i+1),n:i+1+"모둠"})),()=>S.team,v=>S.team=v);
+chipset($("cSex"),[{v:"M",n:"턱걸이"},{v:"F",n:"오래매달리기"}],()=>S.sex,v=>S.sex=v,"wide");
+chipset($("cBand"),CONFIG.BANDS.map(b=>({v:b.k,n:b.n})),()=>S.band,v=>{S.band=v;renderLevel();});
+
+$("iCls").value=S.cls; $("iNum").value=S.num; $("lesVal").textContent=S.lesson;
+$("iCls").oninput=e=>{S.cls=e.target.value.replace(/\D/g,"").slice(0,2);e.target.value=S.cls;after();};
+$("iNum").oninput=e=>{S.num=e.target.value.replace(/\D/g,"").slice(0,2);e.target.value=S.num;after();};
+document.querySelectorAll("[data-les]").forEach(b=>b.onclick=()=>{
+  S.lesson=Math.max(1,Math.min(CONFIG.UNIT_TOTAL,S.lesson+ +b.dataset.les));$("lesVal").textContent=S.lesson;});
+
+function code(){return S.grade+"-"+(S.cls||"?")+"-"+String(S.num||"?").padStart(2,"0");}
+function who(){$("whoami").innerHTML=S.cls&&S.num?"<b>"+code()+"</b><br>"+(S.team?S.team+"모둠":""):"";}
+function valid0(){$("go0").disabled=!(S.cls&&S.num&&S.team&&S.sex);}
+valid0();who();
+$("go0").onclick=()=>{
+  jset("bck_me",{grade:S.grade,cls:S.cls,num:S.num,team:S.team,sex:S.sex,band:S.band,lesson:S.lesson});
+  const last=history.filter(h=>h.code===code()).slice(-1)[0];
+  S.value=last?last.value:0; go(1);
+};
+
+/* ============================================================
+   STEP 2
+   ============================================================ */
+document.querySelectorAll("[data-val]").forEach(b=>b.onclick=()=>{
+  const st=S.sex==="F"?5:1;
+  S.value=Math.max(0,Math.min(S.sex==="F"?300:40,S.value+ +b.dataset.val*st));
+  renderLevel();});
+
+function levelOf(){
+  const T=S.sex==="F"?CONFIG.LEVEL_F:CONFIG.LEVEL_M;
+  const base=T.find(t=>S.value<=t.max)||T[T.length-1];
+  const adj=CONFIG.BANDS.find(b=>b.k===S.band).adj;
+  const lv=Math.max(1,Math.min(4,base.lv+adj));
+  return T.find(t=>t.lv===lv);
+}
+function renderLevel(){
+  const f=S.sex==="F";
+  $("s1t").textContent=f?"오래매달리기 기록":"턱걸이 기록";
+  $("s1s").textContent=f?"유효 자세로 버틴 시간을 초 단위로 입력하세요.":"반동 없이 성공한 개수만 입력하세요.";
+  $("s1lab").textContent=f?"버틴 시간":"성공 개수";
+  $("valVal").textContent=S.value; $("valUnit").textContent=unit();
+  $("tmrBox").style.display=f?"flex":"none";
+  const L=levelOf(); S.lv=L.lv; S.lvName=L.name;
+  $("lvTag").textContent="LV"+L.lv;
+  $("lvTx").innerHTML="<b>"+L.name+" 구간</b> · "+L.tx;
+}
+$("go1").onclick=()=>go(2);
+
+/* 데드행 타이머 */
+let tmrId=null,tmrS=0;
+$("tmrBtn").onclick=()=>{
+  if(tmrId){clearInterval(tmrId);tmrId=null;$("tmrBtn").textContent="타이머로 재기";
+    $("tmrBtn").classList.remove("rec");S.value=tmrS;renderLevel();return;}
+  tmrS=0;$("tmrOut").textContent='0"';$("tmrBtn").textContent="정지 · 기록";
+  $("tmrBtn").classList.add("rec");
+  tmrId=setInterval(()=>{tmrS++;$("tmrOut").textContent=tmrS+'"';},1000);
+};
+
+/* ============================================================
+   STEP 3
+   ============================================================ */
+let customMode=false;
+function progKey(){return (S.sex==="F"?"F":"M")+S.lv;}
+function renderPrograms(){
+  $("s2s").textContent="LV"+S.lv+" "+S.lvName+" 구간 추천입니다. 하나를 고르거나 직접 만드세요.";
+  const box=$("plist");box.innerHTML="";customMode=false;$("customBox").style.display="none";
+  (CONFIG.PROGRAMS[progKey()]||[]).forEach(p=>{
+    const b=document.createElement("button");b.className="prog";
+    b.innerHTML="<div class='prog-h'><div class='prog-n'>"+p.n+"</div>"+
+      "<div class='prog-t'>3세트 · 휴식 "+p.rest+"초</div></div>"+
+      "<div class='prog-g'>"+p.g+"</div><div class='prog-s'>"+
+      p.items.map(i=>"<span>›</span>"+i[0]+" "+i[1]).join("<br>")+"</div>";
+    b.onclick=()=>{sel(b);S.prog={n:p.n,rest:p.rest,items:p.items};$("customBox").style.display="none";customMode=false;};
+    box.appendChild(b);
+  });
+  const c=document.createElement("button");c.className="prog";
+  c.innerHTML="<div class='prog-h'><div class='prog-n'>직접 만들기</div><div class='prog-t'>내가 정하기</div></div>"+
+    "<div class='prog-g'>내 기록을 근거로 종목과 분량을 직접 정합니다.</div>";
+  c.onclick=()=>{sel(c);customMode=true;$("customBox").style.display="block";syncCustom();};
+  box.appendChild(c);
+  function sel(el){[...box.children].forEach(x=>x.classList.remove("sel"));el.classList.add("sel");$("go2").disabled=false;}
+  $("go2").disabled=true;S.prog=null;
+}
+["cn1","cd1","cn2","cd2","cd3"].forEach(id=>$(id).oninput=syncCustom);
+function syncCustom(){
+  const it=[];
+  if($("cn1").value.trim())it.push([$("cn1").value.trim(),$("cd1").value.trim()||"-"]);
+  if($("cn2").value.trim())it.push([$("cn2").value.trim(),$("cd2").value.trim()||"-"]);
+  S.prog={n:"직접 만든 프로그램",rest:parseInt($("cd3").value)||90,items:it.length?it:[["직접 입력","-"]]};
+}
+$("go2").onclick=()=>{if(customMode)syncCustom(); S.done=[false,false,false]; go(3);};
+
+/* ============================================================
+   STEP 4
+   ============================================================ */
+function renderSets(){
+  $("s3e").textContent="STEP 4 · "+S.prog.n;
+  const box=$("sets");box.innerHTML="";
+  for(let i=0;i<3;i++){
+    const b=document.createElement("button");b.className="set";
+    b.innerHTML="<div class='set-no'>SET "+(i+1)+"</div><div class='set-body'>"+
+      S.prog.items.map(it=>"<div class='set-item'><b>"+it[0]+"</b><i>"+it[1]+"</i></div>").join("")+
+      "</div><div class='set-hint'>끝나면 눌러서 지우기</div>";
+    b.onclick=()=>{
+      if(S.done[i])return;
+      S.done[i]=true;b.classList.add("done","pop");
+      b.querySelector(".set-hint").textContent="완료";
+      const n=S.done.filter(Boolean).length;
+      $("go3").disabled=n<3;
+      if(n<3)startRest(S.prog.rest); else {stopRest();$("m3").textContent="3세트 완료. 기록하러 가세요.";}
+    };
+    if(S.done[i]){b.classList.add("done");b.querySelector(".set-hint").textContent="완료";}
+    box.appendChild(b);
+  }
+  $("go3").disabled=S.done.filter(Boolean).length<3;
+  $("m3").textContent="";
+}
+let restId=null;
+function startRest(sec){
+  stopRest();$("restBox").style.display="block";let t=sec;$("restT").textContent=t;
+  restId=setInterval(()=>{t--;$("restT").textContent=t;if(t<=0)stopRest();},1000);
+}
+function stopRest(){if(restId)clearInterval(restId);restId=null;$("restBox").style.display="none";}
+$("restSkip").onclick=stopRest;
+$("go3").onclick=()=>go(4);
+
+/* ============================================================
+   STEP 5
+   ============================================================ */
+chipset($("cRpe"),[1,2,3,4,5].map(v=>({v,n:String(v)})),()=>S.rpe,v=>{S.rpe=v;calcNext();});
+(function(){const box=$("cFail");
+  CONFIG.FAILS.forEach(f=>{const b=document.createElement("button");b.className="chip wide";b.textContent=f;
+    b.onclick=()=>{if(f==="없음"){S.fails=["없음"];[...box.children].forEach(c=>c.classList.remove("sel"));b.classList.add("sel");return;}
+      S.fails=S.fails.filter(x=>x!=="없음");box.children[CONFIG.FAILS.indexOf("없음")].classList.remove("sel");
+      S.fails.includes(f)?S.fails=S.fails.filter(x=>x!==f):S.fails.push(f);
+      b.classList.toggle("sel",S.fails.includes(f));};
+    box.appendChild(b);});})();
+$("iNote").oninput=e=>S.note=e.target.value;
+
+function calcNext(){
+  const st=S.sex==="F"?"5초":"1회", n=S.done.filter(Boolean).length;
+  if(n<3) S.next="다음 차시: 채우지 못한 세트부터 완료하기 (분량은 그대로)";
+  else if(S.rpe<=2) S.next="다음 차시: "+S.prog.n+" 유지 + 세트당 "+st+" 올리기";
+  else if(S.rpe===3) S.next="다음 차시: 같은 분량으로 3세트 모두 완료 유지";
+  else if(S.rpe>=4) S.next="다음 차시: 분량 유지, 휴식 30초 늘리고 자세 점검 먼저";
+  else S.next="체감 난이도를 선택하면 다음 목표가 정해집니다.";
+  $("nextV").textContent=S.next;
+}
+function renderRecord(){
+  const mine=history.filter(h=>h.code===code()&&h.sex===S.sex);
+  const rows=mine.concat([{lesson:S.lesson,value:S.value,sets:S.done.filter(Boolean).length,today:true}]);
+  const best=Math.max(...rows.map(r=>r.value),0);
+  $("stAl").textContent="최고 "+unit();
+  $("stA").textContent=best;
+  $("stB").textContent=mine.reduce((a,b)=>a+(b.sets||0),0)+S.done.filter(Boolean).length;
+  $("stC").textContent=new Set(rows.map(r=>r.lesson)).size;
+  $("chartLab").textContent="기록 변화 ("+unit()+")";
+  drawChart(rows.slice(-8));
+  if(!S.rpe)$("nextV").textContent="체감 난이도를 선택하면 다음 목표가 정해집니다.";else calcNext();
+  $("m4").textContent=CONFIG.SHEET_API?"":"연습 모드: 시트 주소가 없어 이 폰에만 저장됩니다.";
+  $("m4").className="msg"+(CONFIG.SHEET_API?"":" warn");
+}
+function drawChart(rows){
+  const svg=$("chart");
+  if(rows.length<2){svg.style.display="none";$("chartEmpty").style.display="block";return;}
+  svg.style.display="block";$("chartEmpty").style.display="none";
+  const W=320,H=112,pad=14,max=Math.max(...rows.map(r=>r.value),1);
+  const bw=(W-pad*2)/rows.length, g=bw*0.28;
+  let s="";
+  rows.forEach((r,i)=>{
+    const h=Math.max(4,(H-30)*r.value/max), x=pad+i*bw+g/2, y=H-20-h;
+    s+=`<rect x="${x}" y="${y}" width="${bw-g}" height="${h}" rx="4" fill="${r.today?'#C6FF3D':'rgba(63,208,255,.55)'}"/>`;
+    s+=`<text x="${x+(bw-g)/2}" y="${y-4}" fill="#E7EAFB" font-size="11" font-family="Bebas Neue,sans-serif" text-anchor="middle">${r.value}</text>`;
+    s+=`<text x="${x+(bw-g)/2}" y="${H-6}" fill="#8F98C6" font-size="9" text-anchor="middle">${r.lesson}차시</text>`;
+  });
+  svg.innerHTML=s;
+}
+
+/* ============================================================
+   저장 · 구글 시트 전송
+   ============================================================ */
+function payload(){
+  return {
+    ts:new Date().toISOString(), code:code(),
+    grade:S.grade, cls:S.cls, num:S.num, team:S.team,
+    sex:S.sex==="F"?"오래매달리기":"턱걸이", lesson:S.lesson,
+    value:S.value, unit:unit(), band:CONFIG.BANDS.find(b=>b.k===S.band).n,
+    level:"LV"+S.lv+" "+S.lvName, program:S.prog.n,
+    plan:S.prog.items.map(i=>i[0]+" "+i[1]).join(" / "),
+    rest:S.prog.rest, setsDone:S.done.filter(Boolean).length,
+    rpe:S.rpe||"", fails:S.fails.join(","), note:S.note, next:S.next
+  };
+}
+async function post(p){
+  if(!CONFIG.SHEET_API)throw new Error("no-api");
+  const r=await fetch(CONFIG.SHEET_API,{method:"POST",redirect:"follow",
+    headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(p)});
+  const j=await r.json();
+  if(!j||j.ok!==true)throw new Error("sheet-reject");
+  return j;
+}
+async function flush(){
+  if(!CONFIG.SHEET_API||!queue.length)return;
+  const rest=[];
+  for(const p of queue){try{await post(p);}catch(e){rest.push(p);}}
+  queue=rest;jset("bck_queue",queue);
+}
+$("go4").onclick=async()=>{
+  if(!S.rpe){$("m4").textContent="체감 난이도를 선택하세요.";$("m4").className="msg warn";return;}
+  const btn=$("go4");btn.disabled=true;btn.textContent="저장 중…";
+  const p=payload();
+  history.push({code:p.code,sex:S.sex,lesson:S.lesson,value:S.value,sets:p.setsDone,ts:p.ts});
+  jset("bck_hist",history);
+  let saved=false;
+  try{await post(p);saved=true;await flush();}
+  catch(e){if(CONFIG.SHEET_API){queue.push(p);jset("bck_queue",queue);}}
+  btn.disabled=false;btn.textContent="기록 저장";
+  $("doneBadge").textContent=p.setsDone+"/3";
+  $("doneSub").innerHTML=p.code+" · "+S.lesson+"차시 · "+S.value+unit()+"<br>"+S.next;
+  $("donePill").textContent=!CONFIG.SHEET_API?"연습 모드 · 폰에만 저장":
+    saved?"구글 시트 전송 완료":"인터넷 불안정 · 폰에 보관, 다음에 자동 전송";
+  go(5);
+};
+$("go5").onclick=()=>{
+  S.done=[false,false,false];S.rpe=0;S.fails=[];S.note="";S.prog=null;S.next="";
+  $("iNote").value="";[...$("cRpe").children].forEach(c=>c.classList.remove("sel"));
+  [...$("cFail").children].forEach(c=>c.classList.remove("sel"));
+  S.lesson=Math.min(CONFIG.UNIT_TOTAL,S.lesson+1);$("lesVal").textContent=S.lesson;
+  go(0);
+};
+flush();
+</script>
+</body>
+</html>
