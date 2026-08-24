@@ -218,18 +218,18 @@ textarea:focus{outline:none;border-color:var(--sky);}
       <div class="card"><div class="lab">번호</div><input class="num" id="iNum" inputmode="numeric" placeholder="0"></div>
     </div>
     <div class="card">
-      <div class="lab">모둠</div>
-      <div class="chips" id="cTeam"></div>
+      <div class="lab">성별</div>
+      <div class="chips" id="cSex"></div>
     </div>
     <div class="card">
       <div class="lab">측정 종목</div>
-      <div class="chips" id="cSex"></div>
+      <div class="chips" id="cEvent"></div>
     </div>
     <div class="card">
       <div class="lab">오늘 차시</div>
       <div class="stepper">
         <button class="sbtn" data-les="-1">−</button>
-        <div class="sval"><b id="lesVal">5</b><i>차시 / 50</i></div>
+        <div class="sval"><b id="lesVal">5</b><i>차시 / <span id="lesTotal">12</span></i></div>
         <button class="sbtn" data-les="1">+</button>
       </div>
     </div>
@@ -372,25 +372,30 @@ textarea:focus{outline:none;border-color:var(--sky);}
    ============================================================ */
 const CONFIG = {
   // Apps Script 웹앱 URL. 비워두면 '연습 모드'로 폰에만 저장됩니다.
-  SHEET_API: "https://script.google.com/macros/s/AKfycbyy7eJSJdDr9DTZuF4Kr7o_emqLenuQWKYwPCx62GXExf90jVLnZ_44Fl60vGHBs9s1/exec",
+  SHEET_API: "",
 
-  UNIT_TOTAL: 50,        // 단원 총 차시
-  DEFAULT_LESSON: 1,     // 앱을 처음 열 때 보이는 차시
+  UNIT_TOTAL: 12,        // 단원 총 차시
+  DEFAULT_LESSON: 5,     // 앱을 처음 열 때 보이는 차시
   CLASS_MAX: 12,         // 반 최대
-  TEAM_MAX: 6,           // 모둠 개수
 
   // 레벨 기준 — 학교 실측 분포에 맞게 조정하세요 (국가 기준이 아니라 학급 운영용 임의 구간입니다)
-  LEVEL_M: [             // 남 · 턱걸이(회)
+  LEVEL_M: [             // 턱걸이(회)
     {max:0,  lv:1, name:"기초", tx:"밴드 보조와 데드행으로 매달리는 힘부터 만듭니다."},
     {max:3,  lv:2, name:"기본", tx:"첫 개수를 늘리는 단계. 네거티브가 가장 잘 듣습니다."},
     {max:7,  lv:3, name:"향상", tx:"볼륨과 템포로 근력을 쌓는 단계입니다."},
     {max:999,lv:4, name:"심화", tx:"천장에 가깝습니다. 템포·자세와 동료 지도로 도전하세요."}
   ],
-  LEVEL_F: [             // 여 · 오래매달리기(초)
+  LEVEL_F: [             // 오래매달리기(초) · 학급 실측(13명) 기준
     {max:10, lv:1, name:"기초", tx:"발 지지와 밴드로 매달리는 시간을 확보합니다."},
-    {max:25, lv:2, name:"기본", tx:"그립을 강화해 시간을 늘리는 단계입니다."},
-    {max:45, lv:3, name:"향상", tx:"능동 매달리기로 어깨를 쓰는 단계입니다."},
+    {max:20, lv:2, name:"기본", tx:"그립을 강화해 시간을 늘리는 단계입니다."},
+    {max:35, lv:3, name:"향상", tx:"능동 매달리기로 어깨를 쓰는 단계입니다."},
     {max:999,lv:4, name:"심화", tx:"천장에 가깝습니다. 네거티브와 동료 지도로 도전하세요."}
+  ],
+  LEVEL_D: [             // 데드행(초) · 학급 실측(16명) 기준 · 주로 1학년
+    {max:9,  lv:1, name:"기초", tx:"밴드·발 지지로 매달리는 시간부터 만듭니다."},
+    {max:18, lv:2, name:"기본", tx:"스캡 풀로 어깨를 쓰며 시간을 늘립니다."},
+    {max:30, lv:3, name:"향상", tx:"버티는 힘에 당기는 준비 동작을 더합니다."},
+    {max:999,lv:4, name:"심화", tx:"네거티브·동료 지도로 턱걸이를 준비합니다."}
   ],
 
   BANDS: [
@@ -466,10 +471,49 @@ const CONFIG = {
        items:[["네거티브 턱걸이","3회"],["매달리기","30초"]]},
       {n:"동료 지도 + 내 운동", g:"조원 그립을 봐주며 내 시간도 채웁니다.", rest:120,
        items:[["매달리기","40초"],["조원 그립 코칭","1명"]]}
+    ],
+    D1:[
+      {n:"데드행 입문", g:"매달려 버티는 감각부터 익힙니다.", rest:60,
+       items:[["데드행","10초"],["스캡 풀","3회"]]},
+      {n:"밴드 보조 데드행", g:"밴드로 체중을 덜어 시간을 확보합니다.", rest:60,
+       items:[["밴드 보조 데드행","15초"]]},
+      {n:"발 지지 + 스캡", g:"발을 대고 어깨 쓰는 법을 먼저 익힙니다.", rest:60,
+       items:[["박스 발 지지 데드행","20초"],["스캡 풀","4회"]]}
+    ],
+    D2:[
+      {n:"버티기 늘리기", g:"같은 자세로 매달리는 시간을 늘립니다.", rest:75,
+       items:[["데드행","15초"],["스캡 풀","5회"]]},
+      {n:"스캡 강화", g:"어깨를 내렸다 올리는 동작을 반복합니다.", rest:75,
+       items:[["스캡 풀","6회"],["데드행","10초"]]},
+      {n:"그립 버티기", g:"손이 먼저 풀리는 지점을 밀어냅니다.", rest:75,
+       items:[["데드행","20초"]]}
+    ],
+    D3:[
+      {n:"시간 확장", g:"30초 벽을 향해 버팁니다.", rest:90,
+       items:[["데드행","25초"],["스캡 풀","6회"]]},
+      {n:"스캡 볼륨", g:"당기는 준비 근육을 집중해 씁니다.", rest:90,
+       items:[["스캡 풀","8회"],["데드행","15초"]]},
+      {n:"혼합", g:"버티기에 당기기 준비를 더합니다.", rest:90,
+       items:[["데드행","30초"],["스캡 풀","5회"]]}
+    ],
+    D4:[
+      {n:"장시간 데드행", g:"40초 이상 버티기에 도전합니다.", rest:120,
+       items:[["데드행","40초"],["스캡 풀","8회"]]},
+      {n:"네거티브 준비", g:"턱걸이 동작으로 넘어가는 단계입니다.", rest:120,
+       items:[["스캡 풀","10회"],["데드행","25초"]]},
+      {n:"동료 지도 + 내 운동", g:"조원 자세를 봐주며 내 시간도 채웁니다.", rest:120,
+       items:[["데드행","35초"],["조원 자세 코칭","1명"]]}
     ]
   },
 
   FAILS:["그립(손)","어깨","팔꿈치","마지막 세트","호흡","없음"]
+};
+
+/* 측정 종목 정의 — 단위·레벨표·프로그램·타이머를 결정 */
+const EVENTS={
+  pullup:  {n:"턱걸이",     unit:"회", step:1, max:40,  timer:false, levels:"LEVEL_M", prog:"M"},
+  hang:    {n:"오래매달리기", unit:"초", step:5, max:300, timer:true,  levels:"LEVEL_F", prog:"F"},
+  deadhang:{n:"데드행",     unit:"초", step:5, max:300, timer:true,  levels:"LEVEL_D", prog:"D"}
 };
 
 /* ============================================================
@@ -487,18 +531,18 @@ const jset=(k,v)=>store.set(k,JSON.stringify(v));
 /* ============================================================
    상태
    ============================================================ */
-const S={step:0,grade:1,cls:"",num:"",team:"",sex:"",lesson:CONFIG.DEFAULT_LESSON,
+const S={step:0,grade:1,cls:"",num:"",sex:"",event:"",lesson:CONFIG.DEFAULT_LESSON,
   value:0,band:"none",lv:1,lvName:"",prog:null,done:[false,false,false],
   rpe:0,fails:[],note:"",next:""};
 let history=jget("bck_hist",[]);
 let queue=jget("bck_queue",[]);
 const $=id=>document.getElementById(id);
-const unit=()=>S.sex==="F"?"초":"회";
+const unit=()=>(EVENTS[S.event]||{unit:"회"}).unit;
 
 /* 이전 입력 복원 */
 (function restore(){
   const p=jget("bck_me",null); if(!p)return;
-  S.grade=p.grade||1;S.cls=p.cls||"";S.num=p.num||"";S.team=p.team||"";S.sex=p.sex||"";
+  S.grade=p.grade||1;S.cls=p.cls||"";S.num=p.num||"";S.sex=p.sex||"";S.event=p.event||"";
   S.band=p.band||"none";S.lesson=Math.min(CONFIG.UNIT_TOTAL,(p.lesson||CONFIG.DEFAULT_LESSON-1)+1);
 })();
 
@@ -534,23 +578,24 @@ function chipset(box,arr,get,set,cls){
 }
 function after(){ valid0(); who(); }
 chipset($("cGrade"),[1,2,3].map(v=>({v,n:v+"학년"})),()=>S.grade,v=>S.grade=v);
-chipset($("cTeam"),Array.from({length:CONFIG.TEAM_MAX},(_,i)=>({v:String(i+1),n:i+1+"모둠"})),()=>S.team,v=>S.team=v);
-chipset($("cSex"),[{v:"M",n:"턱걸이"},{v:"F",n:"오래매달리기"}],()=>S.sex,v=>S.sex=v,"wide");
+chipset($("cSex"),[{v:"M",n:"남자"},{v:"F",n:"여자"}],()=>S.sex,v=>S.sex=v,"wide");
+chipset($("cEvent"),[{v:"pullup",n:"턱걸이 (남)"},{v:"hang",n:"오래매달리기 (여)"},{v:"deadhang",n:"데드행 (1학년)"}],()=>S.event,v=>S.event=v,"wide");
 chipset($("cBand"),CONFIG.BANDS.map(b=>({v:b.k,n:b.n})),()=>S.band,v=>{S.band=v;renderLevel();});
 
 $("iCls").value=S.cls; $("iNum").value=S.num; $("lesVal").textContent=S.lesson;
+$("lesTotal").textContent=CONFIG.UNIT_TOTAL;
 $("iCls").oninput=e=>{S.cls=e.target.value.replace(/\D/g,"").slice(0,2);e.target.value=S.cls;after();};
 $("iNum").oninput=e=>{S.num=e.target.value.replace(/\D/g,"").slice(0,2);e.target.value=S.num;after();};
 document.querySelectorAll("[data-les]").forEach(b=>b.onclick=()=>{
   S.lesson=Math.max(1,Math.min(CONFIG.UNIT_TOTAL,S.lesson+ +b.dataset.les));$("lesVal").textContent=S.lesson;});
 
 function code(){return S.grade+"-"+(S.cls||"?")+"-"+String(S.num||"?").padStart(2,"0");}
-function who(){$("whoami").innerHTML=S.cls&&S.num?"<b>"+code()+"</b><br>"+(S.team?S.team+"모둠":""):"";}
-function valid0(){$("go0").disabled=!(S.cls&&S.num&&S.team&&S.sex);}
+function who(){$("whoami").innerHTML=S.cls&&S.num?"<b>"+code()+"</b>"+(S.event?"<br>"+EVENTS[S.event].n:""):"";}
+function valid0(){$("go0").disabled=!(S.cls&&S.num&&S.sex&&S.event);}
 valid0();who();
 $("go0").onclick=()=>{
-  jset("bck_me",{grade:S.grade,cls:S.cls,num:S.num,team:S.team,sex:S.sex,band:S.band,lesson:S.lesson});
-  const last=history.filter(h=>h.code===code()).slice(-1)[0];
+  jset("bck_me",{grade:S.grade,cls:S.cls,num:S.num,sex:S.sex,event:S.event,band:S.band,lesson:S.lesson});
+  const last=history.filter(h=>h.code===code()&&h.event===S.event).slice(-1)[0];
   S.value=last?last.value:0; go(1);
 };
 
@@ -558,24 +603,24 @@ $("go0").onclick=()=>{
    STEP 2
    ============================================================ */
 document.querySelectorAll("[data-val]").forEach(b=>b.onclick=()=>{
-  const st=S.sex==="F"?5:1;
-  S.value=Math.max(0,Math.min(S.sex==="F"?300:40,S.value+ +b.dataset.val*st));
+  const E=EVENTS[S.event];
+  S.value=Math.max(0,Math.min(E.max,S.value+ +b.dataset.val*E.step));
   renderLevel();});
 
 function levelOf(){
-  const T=S.sex==="F"?CONFIG.LEVEL_F:CONFIG.LEVEL_M;
+  const T=CONFIG[EVENTS[S.event].levels];
   const base=T.find(t=>S.value<=t.max)||T[T.length-1];
   const adj=CONFIG.BANDS.find(b=>b.k===S.band).adj;
   const lv=Math.max(1,Math.min(4,base.lv+adj));
   return T.find(t=>t.lv===lv);
 }
 function renderLevel(){
-  const f=S.sex==="F";
-  $("s1t").textContent=f?"오래매달리기 기록":"턱걸이 기록";
-  $("s1s").textContent=f?"유효 자세로 버틴 시간을 초 단위로 입력하세요.":"반동 없이 성공한 개수만 입력하세요.";
-  $("s1lab").textContent=f?"버틴 시간":"성공 개수";
+  const E=EVENTS[S.event], t=E.timer;
+  $("s1t").textContent=E.n+" 기록";
+  $("s1s").textContent=t?"유효 자세로 버틴 시간을 초 단위로 입력하세요.":"반동 없이 성공한 개수만 입력하세요.";
+  $("s1lab").textContent=t?"버틴 시간":"성공 개수";
   $("valVal").textContent=S.value; $("valUnit").textContent=unit();
-  $("tmrBox").style.display=f?"flex":"none";
+  $("tmrBox").style.display=t?"flex":"none";
   const L=levelOf(); S.lv=L.lv; S.lvName=L.name;
   $("lvTag").textContent="LV"+L.lv;
   $("lvTx").innerHTML="<b>"+L.name+" 구간</b> · "+L.tx;
@@ -596,7 +641,7 @@ $("tmrBtn").onclick=()=>{
    STEP 3
    ============================================================ */
 let customMode=false;
-function progKey(){return (S.sex==="F"?"F":"M")+S.lv;}
+function progKey(){return EVENTS[S.event].prog+S.lv;}
 function renderPrograms(){
   $("s2s").textContent="LV"+S.lv+" "+S.lvName+" 구간 추천입니다. 하나를 고르거나 직접 만드세요.";
   const box=$("plist");box.innerHTML="";customMode=false;$("customBox").style.display="none";
@@ -674,7 +719,7 @@ chipset($("cRpe"),[1,2,3,4,5].map(v=>({v,n:String(v)})),()=>S.rpe,v=>{S.rpe=v;ca
 $("iNote").oninput=e=>S.note=e.target.value;
 
 function calcNext(){
-  const st=S.sex==="F"?"5초":"1회", n=S.done.filter(Boolean).length;
+  const st=EVENTS[S.event].unit==="초"?"5초":"1회", n=S.done.filter(Boolean).length;
   if(n<3) S.next="다음 차시: 채우지 못한 세트부터 완료하기 (분량은 그대로)";
   else if(S.rpe<=2) S.next="다음 차시: "+S.prog.n+" 유지 + 세트당 "+st+" 올리기";
   else if(S.rpe===3) S.next="다음 차시: 같은 분량으로 3세트 모두 완료 유지";
@@ -683,11 +728,12 @@ function calcNext(){
   $("nextV").textContent=S.next;
 }
 function renderRecord(){
-  const mine=history.filter(h=>h.code===code()&&h.sex===S.sex);
+  const mine=history.filter(h=>h.code===code()&&h.event===S.event);
   const rows=mine.concat([{lesson:S.lesson,value:S.value,sets:S.done.filter(Boolean).length,today:true}]);
   const best=Math.max(...rows.map(r=>r.value),0);
-  $("stAl").textContent="최고 "+unit();
-  $("stA").textContent=best;
+  const base=baseline(), gain=S.value-base;
+  $("stAl").textContent="첫 기록 대비";
+  $("stA").textContent=(gain>0?"+":"")+gain;
   $("stB").textContent=mine.reduce((a,b)=>a+(b.sets||0),0)+S.done.filter(Boolean).length;
   $("stC").textContent=new Set(rows.map(r=>r.lesson)).size;
   $("chartLab").textContent="기록 변화 ("+unit()+")";
@@ -715,12 +761,19 @@ function drawChart(rows){
 /* ============================================================
    저장 · 구글 시트 전송
    ============================================================ */
+function baseline(){
+  const mine=history.filter(h=>h.code===code()&&h.event===S.event)
+    .sort((a,b)=>new Date(a.ts)-new Date(b.ts));
+  return mine.length?mine[0].value:S.value;   // 첫 측정값 (없으면 오늘이 첫 측정)
+}
 function payload(){
+  const base=baseline();
   return {
     ts:new Date().toISOString(), code:code(),
-    grade:S.grade, cls:S.cls, num:S.num, team:S.team,
-    sex:S.sex==="F"?"오래매달리기":"턱걸이", lesson:S.lesson,
-    value:S.value, unit:unit(), band:CONFIG.BANDS.find(b=>b.k===S.band).n,
+    grade:S.grade, cls:S.cls, num:S.num,
+    sex:S.sex==="M"?"남":"여", event:EVENTS[S.event].n, lesson:S.lesson,
+    value:S.value, unit:unit(), base:base, gain:S.value-base,
+    band:CONFIG.BANDS.find(b=>b.k===S.band).n,
     level:"LV"+S.lv+" "+S.lvName, program:S.prog.n,
     plan:S.prog.items.map(i=>i[0]+" "+i[1]).join(" / "),
     rest:S.prog.rest, setsDone:S.done.filter(Boolean).length,
@@ -745,7 +798,7 @@ $("go4").onclick=async()=>{
   if(!S.rpe){$("m4").textContent="체감 난이도를 선택하세요.";$("m4").className="msg warn";return;}
   const btn=$("go4");btn.disabled=true;btn.textContent="저장 중…";
   const p=payload();
-  history.push({code:p.code,sex:S.sex,lesson:S.lesson,value:S.value,sets:p.setsDone,ts:p.ts});
+  history.push({code:p.code,event:S.event,lesson:S.lesson,value:S.value,sets:p.setsDone,ts:p.ts});
   jset("bck_hist",history);
   let saved=false;
   try{await post(p);saved=true;await flush();}
