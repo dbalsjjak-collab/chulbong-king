@@ -229,7 +229,7 @@ textarea:focus{outline:none;border-color:var(--sky);}
       <div class="lab">오늘 차시</div>
       <div class="stepper">
         <button class="sbtn" data-les="-1">−</button>
-        <div class="sval"><b id="lesVal">5</b><i>차시 / <span id="lesTotal">12</span></i></div>
+        <div class="sval"><b id="lesVal">5</b><i>차시 · 제한 없음</i></div>
         <button class="sbtn" data-les="1">+</button>
       </div>
     </div>
@@ -374,7 +374,6 @@ const CONFIG = {
   // Apps Script 웹앱 URL. 비워두면 '연습 모드'로 폰에만 저장됩니다.
   SHEET_API: "https://script.google.com/macros/s/AKfycbyy7eJSJdDr9DTZuF4Kr7o_emqLenuQWKYwPCx62GXExf90jVLnZ_44Fl60vGHBs9s1/exec",
 
-  UNIT_TOTAL: 12,        // 단원 총 차시
   DEFAULT_LESSON: 5,     // 앱을 처음 열 때 보이는 차시
   CLASS_MAX: 12,         // 반 최대
 
@@ -383,19 +382,19 @@ const CONFIG = {
     {max:0,  lv:1, name:"기초", tx:"밴드 보조와 데드행으로 매달리는 힘부터 만듭니다."},
     {max:3,  lv:2, name:"기본", tx:"첫 개수를 늘리는 단계. 네거티브가 가장 잘 듣습니다."},
     {max:7,  lv:3, name:"향상", tx:"볼륨과 템포로 근력을 쌓는 단계입니다."},
-    {max:999,lv:4, name:"심화", tx:"천장에 가깝습니다. 템포·자세와 동료 지도로 도전하세요."}
+    {max:999,lv:4, name:"심화", tx:"느린 템포와 정확한 자세로 개인 목표에 도전하세요."}
   ],
   LEVEL_F: [             // 오래매달리기(초) · 학급 실측(13명) 기준
     {max:10, lv:1, name:"기초", tx:"발 지지와 밴드로 매달리는 시간을 확보합니다."},
     {max:20, lv:2, name:"기본", tx:"그립을 강화해 시간을 늘리는 단계입니다."},
     {max:35, lv:3, name:"향상", tx:"능동 매달리기로 어깨를 쓰는 단계입니다."},
-    {max:999,lv:4, name:"심화", tx:"천장에 가깝습니다. 네거티브와 동료 지도로 도전하세요."}
+    {max:999,lv:4, name:"심화", tx:"매달리기 시간을 늘리고 네거티브에 도전하세요."}
   ],
   LEVEL_D: [             // 데드행(초) · 학급 실측(16명) 기준 · 주로 1학년
     {max:9,  lv:1, name:"기초", tx:"밴드·발 지지로 매달리는 시간부터 만듭니다."},
     {max:18, lv:2, name:"기본", tx:"스캡 풀로 어깨를 쓰며 시간을 늘립니다."},
     {max:30, lv:3, name:"향상", tx:"버티는 힘에 당기는 준비 동작을 더합니다."},
-    {max:999,lv:4, name:"심화", tx:"네거티브·동료 지도로 턱걸이를 준비합니다."}
+    {max:999,lv:4, name:"심화", tx:"장시간 데드행과 스캡 풀로 턱걸이를 준비합니다."}
   ],
 
   BANDS: [
@@ -436,9 +435,7 @@ const CONFIG = {
       {n:"고반복", g:"세트당 개수를 밀어 올립니다.", rest:120,
        items:[["턱걸이","8회"]]},
       {n:"느린 템포", g:"개수를 줄이고 난도를 올립니다.", rest:120,
-       items:[["느린 템포 턱걸이","6회 (2-2-4초)"]]},
-      {n:"동료 지도 + 내 운동", g:"기초 조원의 자세를 봐주며 내 볼륨도 채웁니다.", rest:120,
-       items:[["턱걸이","6회"],["조원 자세 코칭","1명"]]}
+       items:[["느린 템포 턱걸이","6회 (2-2-4초)"]]}
     ],
     F1:[
       {n:"밴드 보조 매달리기", g:"밴드로 체중을 덜고 시간을 확보합니다.", rest:60,
@@ -468,9 +465,7 @@ const CONFIG = {
       {n:"장시간", g:"45초 이상을 목표로 밀어 올립니다.", rest:120,
        items:[["매달리기","45초"]]},
       {n:"네거티브 도전", g:"턱걸이 동작으로 넘어가는 단계입니다.", rest:120,
-       items:[["네거티브 턱걸이","3회"],["매달리기","30초"]]},
-      {n:"동료 지도 + 내 운동", g:"조원 그립을 봐주며 내 시간도 채웁니다.", rest:120,
-       items:[["매달리기","40초"],["조원 그립 코칭","1명"]]}
+       items:[["네거티브 턱걸이","3회"],["매달리기","30초"]]}
     ],
     D1:[
       {n:"데드행 입문", g:"매달려 버티는 감각부터 익힙니다.", rest:60,
@@ -500,9 +495,7 @@ const CONFIG = {
       {n:"장시간 데드행", g:"40초 이상 버티기에 도전합니다.", rest:120,
        items:[["데드행","40초"],["스캡 풀","8회"]]},
       {n:"네거티브 준비", g:"턱걸이 동작으로 넘어가는 단계입니다.", rest:120,
-       items:[["스캡 풀","10회"],["데드행","25초"]]},
-      {n:"동료 지도 + 내 운동", g:"조원 자세를 봐주며 내 시간도 채웁니다.", rest:120,
-       items:[["데드행","35초"],["조원 자세 코칭","1명"]]}
+       items:[["스캡 풀","10회"],["데드행","25초"]]}
     ]
   },
 
@@ -543,7 +536,7 @@ const unit=()=>(EVENTS[S.event]||{unit:"회"}).unit;
 (function restore(){
   const p=jget("bck_me",null); if(!p)return;
   S.grade=p.grade||1;S.cls=p.cls||"";S.num=p.num||"";S.sex=p.sex||"";S.event=p.event||"";
-  S.band=p.band||"none";S.lesson=Math.min(CONFIG.UNIT_TOTAL,(p.lesson||CONFIG.DEFAULT_LESSON-1)+1);
+  S.band=p.band||"none";S.lesson=Math.max(1,(Number(p.lesson)||CONFIG.DEFAULT_LESSON-1)+1);
 })();
 
 /* ============================================================
@@ -583,11 +576,10 @@ chipset($("cEvent"),[{v:"pullup",n:"턱걸이 (남)"},{v:"hang",n:"오래매달�
 chipset($("cBand"),CONFIG.BANDS.map(b=>({v:b.k,n:b.n})),()=>S.band,v=>{S.band=v;renderLevel();});
 
 $("iCls").value=S.cls; $("iNum").value=S.num; $("lesVal").textContent=S.lesson;
-$("lesTotal").textContent=CONFIG.UNIT_TOTAL;
 $("iCls").oninput=e=>{S.cls=e.target.value.replace(/\D/g,"").slice(0,2);e.target.value=S.cls;after();};
 $("iNum").oninput=e=>{S.num=e.target.value.replace(/\D/g,"").slice(0,2);e.target.value=S.num;after();};
 document.querySelectorAll("[data-les]").forEach(b=>b.onclick=()=>{
-  S.lesson=Math.max(1,Math.min(CONFIG.UNIT_TOTAL,S.lesson+ +b.dataset.les));$("lesVal").textContent=S.lesson;});
+  S.lesson=Math.max(1,S.lesson+ +b.dataset.les);$("lesVal").textContent=S.lesson;});
 
 function code(){return S.grade+"-"+(S.cls||"?")+"-"+String(S.num||"?").padStart(2,"0");}
 function who(){$("whoami").innerHTML=S.cls&&S.num?"<b>"+code()+"</b>"+(S.event?"<br>"+EVENTS[S.event].n:""):"";}
@@ -814,7 +806,7 @@ $("go5").onclick=()=>{
   S.done=[false,false,false];S.rpe=0;S.fails=[];S.note="";S.prog=null;S.next="";
   $("iNote").value="";[...$("cRpe").children].forEach(c=>c.classList.remove("sel"));
   [...$("cFail").children].forEach(c=>c.classList.remove("sel"));
-  S.lesson=Math.min(CONFIG.UNIT_TOTAL,S.lesson+1);$("lesVal").textContent=S.lesson;
+  S.lesson=S.lesson+1;$("lesVal").textContent=S.lesson;
   go(0);
 };
 flush();
